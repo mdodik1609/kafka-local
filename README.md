@@ -2,8 +2,8 @@
 
 This project contains two Spring Boot microservices communicating via Apache Kafka:
 
-- **kafka-producer**: Sends messages to a Kafka topic.
-- **kafka-consumer**: Listens to the topic, transforms messages, and forwards them to another topic.
+- **producer**: Sends messages to a Kafka topic.
+- **consumer**: Listens to the topic, transforms messages, and forwards them to another topic.
 
 > Both services use Gradle and JDK 21.
 
@@ -64,7 +64,7 @@ cd kafka-consumer
 ./gradlew bootRun
 ```
 
-Runs on `http://localhost:8081` *(not exposed but logs transformation)*
+Runs on `http://localhost:8081`
 
 ---
 
@@ -73,14 +73,7 @@ Runs on `http://localhost:8081` *(not exposed but logs transformation)*
 Send a JSON message to the **producer**, which will publish it to Kafka:
 
 ```bash
-curl -X POST "http://localhost:8080/api/messages" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "uuid": 1,
-    "type": "UPDATE",
-    "name": "Dinamo",
-    "other": "other"
-}'
+curl -X POST "http://localhost:8080/api/messages?message=First message." 
 ```
 
 ---
@@ -91,12 +84,12 @@ curl -X POST "http://localhost:8080/api/messages" \
 2. **Consumer** listens to `demo-topic`.
 3. On receiving a message, the **consumer** transforms it:
     - From:
-      ```json
-      { "uuid": 1, "type": "UPDATE", "name": "Dinamo", "other": "other" }
+      ```
+        "First message."
       ```
     - To:
-      ```json
-      { "uuid": 1, "action": "UPDATE", "firstName": "Dinamo" }
+      ```
+        "First message. This is addon on message."
       ```
 4. Then it publishes the transformed message to Kafka topic `demo-topic-core`.
 
