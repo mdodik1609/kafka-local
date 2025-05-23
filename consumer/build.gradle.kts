@@ -20,7 +20,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.apache.kafka:kafka-streams")
+	implementation("org.apache.kafka:kafka-streams:3.7.0")
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 

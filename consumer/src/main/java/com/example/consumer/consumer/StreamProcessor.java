@@ -4,6 +4,7 @@ import com.example.consumer.model.Option;
 import com.example.consumer.model.Subscriber;
 import com.example.consumer.model.SubscriberOption;
 import com.example.consumer.model.SubscriberOptionDto;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
@@ -21,7 +22,7 @@ public class StreamProcessor {
         JsonSerde<Subscriber> subscriberSerde = new JsonSerde<>(Subscriber.class);
         JsonSerde<Option> optionSerde = new JsonSerde<>(Option.class);
         JsonSerde<SubscriberOption> subscriberOptionSerde = new JsonSerde<>(SubscriberOption.class);
-        JsonSerde<SubscriberOptionDto> dtoSerde = new JsonSerde<>(SubscriberOptionDto.class);
+        Serde<SubscriberOptionDto> dtoSerde = new JsonSerde<>(SubscriberOptionDto.class);
 
         KTable<String, Subscriber> subscribers = builder.table(
                 "subs_in",
@@ -38,7 +39,7 @@ public class StreamProcessor {
                 Consumed.with(Serdes.String(), subscriberOptionSerde)
         );
 
-        KStream<String, SubscriberOptionDto> enriched = inputStream
+        KStream<String, Object> enriched = inputStream
                 .selectKey((k, v) -> v.getSubscriberId())
                 .join(subscribers, (subscriberOption, subscriber) -> {
                     SubscriberOptionDto dto = new SubscriberOptionDto();
@@ -54,8 +55,8 @@ public class StreamProcessor {
                     }
                     return dto;
                 });
-
-        enriched.to("cd-core-topic", Produced.with(Serdes.String(), dtoSerde));
+        Produced produced = Produced.with(Serdes.String(), dtoSerde);
+        enriched.to("cd-core-topic", produced);
 
         return inputStream;
     }
